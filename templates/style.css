@@ -1,0 +1,17 @@
+*{
+    margin: 200;
+    padding: 250;
+}
+body{
+    background : #202020;
+}
+
+.custom-field {
+    color: #202020;
+    position: relative;
+    font-size: 14px;
+    border-top: 20px solid transparent;
+    margin-bottom: 5px;
+    display: inline-block;
+    --field-padding: 12px;
+  }

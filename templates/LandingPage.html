@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Research Proposals</title>
+  <link rel="stylesheet" type = "text/css" href="style.css" >
+</head>
+<!-- Set background color + set message fields-->
+<body style="background-color: #abb0ac">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf-8">
+        function goLogin(){
+            window.location.href = "/LoginAccount";
+        }
+        function goCreateAcnt(){
+            window.location.href = "/CreateAccount";
+        }
+        function goFundingAgency(){
+            window.location.href = "/FundingAgency";
+        }
+    </script>
+    <form action="Form.php" id="ResearchForm">
+        <fieldset>
+        <legend style="color : #0a0a0a; font-family: Helvetica, Arial; font-size : 34px; ">HomePage</legend>
+            <button type="button" id="create-room" onclick="goCreateAcnt()" >Create Account</button>
+                <!-- Style button -->
+                <style>
+            /* CSS */
+                button[id=create-room] {
+                font-family: "Open Sans", sans-serif;
+                font-size: 16px;
+                width: 225px;
+                height:40px;
+                letter-spacing: 2px;
+                text-decoration: none;
+                text-transform: uppercase;
+                color: #000;
+                cursor: pointer;
+                border: 3px solid;
+                padding: 0.25em 0.5em;
+                box-shadow: 1px 1px 0px 0px, 2px 2px 0px 0px, 3px 3px 0px 0px, 4px 4px 0px 0px, 5px 5px 0px 0px;
+                user-select: none;
+                -webkit-user-select: none;
+                touch-action: manipulation;
+                }
+
+                button[id=create-room]:active {
+                box-shadow: 0px 0px 0px 0px;
+                }
+
+                @media (min-width: 768px) {
+                .button-54 {
+                    padding: 0.25em 0.75em;
+                }
+                }
+                </style>
+            <button type="button" id="create-room" onclick="goLogin()" >Login Account</button>
+            <button type="button" id="create-room" onclick="goFundingAgency()" >Funding Agency</button>
+        </fieldset>
+    </form>
+</body>
+</html>

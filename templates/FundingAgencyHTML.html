@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>FundingAgency</title>
+  <link rel="stylesheet" type = "text/css" href="style.css" >
+</head>
+<!-- Set background color + set message fields-->
+<body style="background-color: #abb0ac">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+  <script type="text/javascript" charset="utf-8">
+      var socket = io.connect('http://' + document.domain + ':' + location.port);
+      var InfoOnlyBool = false; 
+      var roomID;
+      socket.on( 'connect', function() {
+        socket.emit('onconnect');
+      })
+      socket.on( 'connected', function(msg) {
+        roomID = msg.UniqueID;
+      })
+      function clearElements(){
+        const myNode = document.getElementById("ProposalsDisplayed2");
+        myNode.innerHTML = '';
+      }
+      function AcceptedProposals()
+      {
+        //document.getElementById("Rejected").innerHTML = "YOU CLICKED ME!";
+        console.log('msg.Title');
+        clearElements();
+        socket.emit('getProposals',{"proposal" : "AcceptedProposals", "InfoOnly" : true,"UniqueID": roomID});
+      }
+      function ProposalInformation(id, Table)
+      {
+        clearElements();
+        socket.emit('ProposalInformation',{"proposal" : Table, "ID" : id,"UniqueID": roomID});
+      }
+      function ProposalAccepted(id)
+      {
+        let budget = document.getElementById("BudgetValue").value;
+        let endDate = document.getElementById("DateValue").value;
+        socket.emit('SetProposalAccepted',{"ID" : id,"Budget" : budget, "endDate" : endDate,"UniqueID": roomID});
+        clearElements();
+      }
+      function ProposalRejected(id)
+      {
+        socket.emit('SetProposalRejected',{"ID" : id,"UniqueID": roomID});
+        clearElements();
+      }
+      function RejectedProposals()
+      {
+        clearElements();
+        socket.emit('getProposals',{"proposal" : "RejectedProposals", "InfoOnly" : true,"UniqueID": roomID});
+      }
+      function IdleProposals()
+      {
+        clearElements();
+        socket.emit('getProposals',{"proposal" : "IdleProposals", "InfoOnly" : false,"UniqueID": roomID});
+      }
+      socket.on('ProposalTitles', function(msg) {
+        const myNode = document.getElementById("ProposalsDisplayed2");
+        InfoOnlyBool = msg.InfoOnly;
+        myNode.innerHTML += '<br>' +  msg.Title  + '<div style="width:420px; height:auto; display:inline-block"></div><button type="button" id="Idle" onclick="ProposalInformation(\'' + msg.ID + '\' , \'' + msg.Table + '\')" >Information</button>';
+      })
+      socket.on('ProposalInformation', function(msg) {
+        const myNode = document.getElementById("ProposalsDisplayed2");
+        myNode.innerHTML += '<br> <p> Proposal Title : ' +  msg.Title + '<p>'  ;
+        myNode.innerHTML += '<br> <p> Project Description : ' +  msg.ProjectDescription + '<p>'  ;
+        myNode.innerHTML += '<br> <p> Fund Amount : ' +  msg.FundAmount + '<p>'  ;
+        if(InfoOnlyBool == false){
+          myNode.innerHTML += '<br> <p> Notify DCU with details : <p>';
+          myNode.innerHTML += '<br>Budget:<br><input type="text" id="BudgetValue" value=""><br>';
+          myNode.innerHTML += '<br>Researcher:<br>' + msg.Name + '<br>';
+          myNode.innerHTML += '<br>End Date:<br><input type="date" id="DateValue" placeholder="yyyy-mm-dd"><br> ';
+          myNode.innerHTML += '<br> <p> Set Proposal Status : <p>';
+          myNode.innerHTML += '<button type="button" id="Idle" onclick="ProposalAccepted(\'' + msg.ID + '\')")" >Approve</button>';
+          myNode.innerHTML += '<button type="button" id="Idle" onclick="ProposalRejected(\'' + msg.ID + '\')")" >Decline</button>';
+        }
+      })
+    </script>
+    <form action="Form.php">
+    <fieldset>
+    <legend style="color : #0a0a0a; font-family: Helvetica, Arial; font-size : 34px; ">Research Proposals</legend>
+      <section id = "buttons">
+          <button type="button" id="create-room" onclick="AcceptedProposals()" >Accepted</button>
+              <!-- Style button -->
+              <style>
+          /* CSS */
+              button[id=create-room] {
+                font-family: "Open Sans", sans-serif;
+                font-size: 16px;
+                width: 225px;
+                height:40px;
+                letter-spacing: 2px;
+                text-decoration: none;
+                text-transform: uppercase;
+                color: #000;
+                cursor: pointer;
+                border: 3px solid;
+                padding: 0.25em 0.5em;
+                box-shadow: 1px 1px 0px 0px, 2px 2px 0px 0px, 3px 3px 0px 0px, 4px 4px 0px 0px, 5px 5px 0px 0px;
+                user-select: none;
+                -webkit-user-select: none;
+                touch-action: manipulation;
+              }
+      
+              button[id=create-room]:active {
+                box-shadow: 0px 0px 0px 0px;
+              }
+      
+          @media (min-width: 768px) {
+            .button-54 {
+              padding: 0.25em 0.75em;
+            }
+          }
+              </style>
+
+          <button type="button" id="Rejected" onclick="RejectedProposals()" >Rejected</button>
+              <!-- Style button -->
+            <style>
+          /* CSS */
+              button[id=Rejected] {
+              font-family: "Open Sans", sans-serif;
+              font-size: 16px;
+              width: 225px;
+              height:40px;
+              letter-spacing: 2px;
+              text-decoration: none;
+              text-transform: uppercase;
+              color: #000;
+              cursor: pointer;
+              border: 3px solid;
+              padding: 0.25em 0.5em;
+              box-shadow: 1px 1px 0px 0px, 2px 2px 0px 0px, 3px 3px 0px 0px, 4px 4px 0px 0px, 5px 5px 0px 0px;
+              user-select: none;
+              -webkit-user-select: none;
+              touch-action: manipulation;
+              }
+
+              button[id=Rejected]:active {
+              box-shadow: 0px 0px 0px 0px;
+              }
+
+              @media (min-width: 768px) {
+              .button-54 {
+                  padding: 0.25em 0.75em;
+              }
+              }
+            </style>
+        
+
+          <button type="button" id="Idle" onclick="IdleProposals()"  >Idle</button>
+              <!-- Style button -->
+              <style>
+          /* CSS */
+              button[id=Idle] {
+              font-family: "Open Sans", sans-serif;
+              font-size: 16px;
+              width: 225px;
+              height:40px;
+              letter-spacing: 2px;
+              text-decoration: none;
+              text-transform: uppercase;
+              color: #000;
+              cursor: pointer;
+              border: 3px solid;
+              padding: 0.25em 0.5em;
+              box-shadow: 1px 1px 0px 0px, 2px 2px 0px 0px, 3px 3px 0px 0px, 4px 4px 0px 0px, 5px 5px 0px 0px;
+              user-select: none;
+              -webkit-user-select: none;
+              touch-action: manipulation;
+              }
+
+              button[id=Idle]:active {
+              box-shadow: 0px 0px 0px 0px;
+              }
+
+              @media (min-width: 768px) {
+              .button-54 {
+                  padding: 0.25em 0.75em;
+              }
+              }
+              </style> 
+      </section>
+      <div class = "ProposalsDisplayed" id="ProposalsDisplayed2">
+        
+      </div>  
+      
+    </fieldset>
+    </form>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Research Proposals</title>
+  <link rel="stylesheet" type = "text/css" href="style.css" >
+</head>
+<!-- Set background color + set message fields-->
+<body style="background-color: #abb0ac">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+  <script type="text/javascript" charset="utf-8">
+      var socket = io.connect('http://' + document.domain + ':' + location.port);
+      var roomID;
+      socket.on( 'connect', function() {
+        socket.emit('onconnect');
+      })
+      socket.on( 'connected', function(msg) {
+        roomID = msg.UniqueID;
+      })
+      function ProposalSubmit()
+      {
+        //leave and join room
+        let title = document.getElementById("TitleValue").value;
+        let pro_descr = document.getElementById("ProjectDescr").value;
+        let fund_amount = document.getElementById("FundingAmount").value;
+        var ResearchId = '{{ data.ResearcherId }}';
+        socket.emit('SubmitProposal',{"Title" : title, "ProjectDescription" : pro_descr, "FundAmount": fund_amount, "ResearcherId" : ResearchId,"UniqueID": roomID});
+        ProposalStatus()
+      }
+      function ProposalStatus(){
+        window.location.href = "/ResearchProposals";
+      }
+  </script>
+    <form action="Form.php">
+    <fieldset>
+    <legend style="color : #0a0a0a; font-family: Helvetica, Arial; font-size : 34px; ">Research Proposal</legend>
+      <section id="input">
+        Title:<br><input type="text" id="TitleValue" value=""><br>
+        Project Description:<br><input type="text" id="ProjectDescr" value=""><br>
+        Funding Amount:<br><input type="text" id="FundingAmount" value=""><br><br>
+        <button type="button" id="ButtonProps" onclick="ProposalSubmit()" >Submit</button><div>
+          <style>
+            /* CSS */
+                button[id=ButtonProps] {
+                  font-family: "Open Sans", sans-serif;
+                  font-size: 16px;
+                  width: 225px;
+                  height:40px;
+                  letter-spacing: 2px;
+                  text-decoration: none;
+                  text-transform: uppercase;
+                  color: #000;
+                  cursor: pointer;
+                  border: 3px solid;
+                  padding: 0.25em 0.5em;
+                  box-shadow: 1px 1px 0px 0px, 2px 2px 0px 0px, 3px 3px 0px 0px, 4px 4px 0px 0px, 5px 5px 0px 0px;
+                  user-select: none;
+                  -webkit-user-select: none;
+                  touch-action: manipulation;
+                }
+        
+                button[id=create-room]:active {
+                  box-shadow: 0px 0px 0px 0px;
+                }
+        
+            @media (min-width: 768px) {
+              .button-54 {
+                padding: 0.25em 0.75em;
+              }
+            }
+            </style>
+        <button type="button" id="ButtonProps" onclick="ProposalStatus()" >Proposal Status</button></div>
+      </section>
+    </fieldset>
+    </form>
+</body>
+</html>

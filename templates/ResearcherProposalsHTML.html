@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Research Proposals</title>
+  <link rel="stylesheet" type = "text/css" href="style.css" >
+</head>
+<!-- Set background color + set message fields-->
+<body style="background-color: #abb0ac">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+  <script type="text/javascript" charset="utf-8">
+    var scheme = window.location.protocol == "https:" ? 'wss://' : 'ws://';
+    var webSocketUri =    scheme
+                          + window.location.hostname
+                          + (location.port ? ':'+location.port: '')
+                          + '/chat';
+    var socket = new WebSocket(webSocketUri);
+    var roomID;
+    socket.on( 'connect', function() {
+      socket.emit('onconnect');
+    })
+    socket.on( 'connected', function(msg) {
+      roomID = msg.UniqueID;
+    })
+    var researchHolderID = 0;
+    var ResearchAccountID = 0;
+    function clearElements(){
+      const myNode = document.getElementById("ProposalsDisplayed2");
+      myNode.innerHTML = '';
+      myNode.innerHTML += "<p>Proposal Title:</p>";
+    }
+    function clearElementsAccount(){
+      const myNode = document.getElementById("ProposalsDisplayed2");
+      myNode.innerHTML = '';
+    }
+    function SearchStringFunction(){
+      let searchStringVariable = document.getElementById("SearchString").value;
+      socket.emit('SearchForResearcher',{"searchString" : searchStringVariable,"UniqueID": roomID});
+    }
+    function AcceptedProposals()
+    {
+      websocket.send();
+    }
+    function RejectedProposals()
+    {
+      clearElements();
+      var ResearchId = '{{ data.ResearcherId }}';
+      socket.emit('getProposalsResearcher',{"proposal" : "RejectedProposals","ResearcherId" : ResearchId,"UniqueID": roomID});
+    }
+    function IdleProposals()
+    {
+      clearElements();
+      var ResearchId = '{{ data.ResearcherId }}';
+      socket.emit('getProposalsResearcher',{"proposal" : "IdleProposals","ResearcherId" : ResearchId,"UniqueID": roomID});
+    }
+    function ListRemoveResearch(AccountID){
+      var ResearchId = '{{ data.ResearcherId }}';
+      socket.emit('RemoveResearcherList',{"HolderAccountID":AccountID,"UniqueID": roomID});
+    }
+    function WithdrawFunds(ResearcherID,HolderID){
+      clearElementsAccount();
+      const myNode = document.getElementById("ProposalsDisplayed2");
+      myNode.innerHTML += '<br>Funds to Withdraw:<br><input type="text" id="FundsWithdraw" value=""><br>'
+      myNode.innerHTML += '<br>Withdrawal reason:<br><input type="text" id="ReasonWithdraw" value=""><br>'
+      myNode.innerHTML += '<br></div><button type="button" onclick="WithdrawAccount(\'' + ResearcherID + '\' , \'' + HolderID + '\')" id="Buttons" >Withdraw</button>';
+    }
+    function WithdrawAccount(ResearcherID,HolderID){
+      let funds = document.getElementById("FundsWithdraw").value;
+      let reason = document.getElementById("ReasonWithdraw").value;
+      socket.emit('WithdrawFunds',{"Funds" : funds, "Reason" : reason,"ID" : ResearcherID,"HolderID" :HolderID,"UniqueID": roomID});
+      clearElementsAccount();
+    }
+    function Transactions(ResearcherID,HolderID){
+      socket.emit('Transactions',{"ID" : ResearcherID,"HolderID" : HolderID,"UniqueID": roomID});
+    }
+    function ListResearchers(ResearcherID,HolderID){
+      ResearchAccountID = HolderID
+      socket.emit('ListResearchers',{"ID" : ResearcherID,"HolderID" : HolderID,"UniqueID": roomID});
+    }
+    function ResearchAccount(ResearcherID,HolderID){
+      clearElementsAccount();
+      const myNode = document.getElementById("ProposalsDisplayed2");
+      researchHolderID = HolderID;
+      myNode.innerHTML += '<button type="button" id="Buttons" onclick="Details(\'' + ResearcherID + '\' , \'' + HolderID + '\')" >Details</button>';
+      myNode.innerHTML += '<button type="button" onclick="ListRemoveResearch(\'' + HolderID + '\')" id="Buttons" >Remove Researchers</button>';
+      myNode.innerHTML += '<button type="button" onclick="ListResearchers(\'' + ResearcherID + '\' , \'' + HolderID + '\')" id="Buttons" >Add-Researchers</button>';
+      myNode.innerHTML +=  '<button type="button" id="Buttons" onclick="Transactions(\'' + ResearcherID + '\' , \'' + HolderID + '\')" >Transactions</button>';
+      myNode.innerHTML +=  '<button type="button" id="Buttons" onclick="WithdrawFunds(\'' + ResearcherID + '\' , \'' + HolderID + '\')" >Withdraw Funds</button>';
+    }
+    function Details(ResearcherID,HolderID){
+      socket.emit('ResearchAccountDetails',{"ID" : ResearcherID,"HolderID" :HolderID,"UniqueID": roomID});
+    }
+    function AddResearcher(Name,ID,HolderID){
+      clearElements();
+      var ResearchId = '{{ data.ResearcherId }}';
+      socket.emit('AddResearcher',{"ID" : ResearchId, "Name" : Name,"ResearcherAddedID":ID,"ResearcherID" : ResearchId,"AccountID" : ResearchAccountID,"UniqueID": roomID});
+    }
+    function AccountsAdded(){
+      clearElements();
+      var ResearchId = '{{ data.ResearcherId }}';
+      socket.emit('AccountsAdded',{"ID" : ResearchId,"UniqueID": roomID});
+    }
+    function RemoveResearcher(ID){
+      clearElements();
+      var ResearchId = '{{ data.ResearcherId }}';
+      socket.emit('RemoveResearcher',{"ID" : ResearchId, "ResearcherAddedID" : ID,"HolderAccountID" : researchHolderID,"UniqueID": roomID});
+    }
+    function NewProposal(){
+        window.location.href = "/ResearchForm";
+    }
+    socket.on('ResearcherProposalTitles', function(msg) {
+        const myNode = document.getElementById("ProposalsDisplayed2");
+        myNode.innerHTML += '<br>' +  msg.Title ;
+      })
+    websocket.onmessage = function(e) {
+      const myNode = document.getElementById("ProposalsDisplayed2");
+      myNode.innerHTML += '<br>' +  e.data + '<div style="width:420px; height:auto; display:inline-block"></div><button type="button" id="Buttons" >ResearchAccount</button>';
+    }
+    socket.on('ResearcherProposalTitlesAdd', function(msg) {
+      const myNode = document.getElementById("ProposalsDisplayed2");
+      myNode.innerHTML += '<br>' +  msg.Title + '<div style="width:420px; height:auto; display:inline-block"></div><button type="button" id="Buttons" onclick="ResearchAccount(\'' + msg.ResearcherId + '\' , \'' + msg.AccountID + '\')" >ResearchAccount</button>';
+    })
+    socket.on('ResearcherDetails', function(msg) {
+      const myNode = document.getElementById("ProposalsDisplayed2");
+      myNode.innerHTML += '<br> <p> Proposal Title : ' +  msg.Title + '<p>'  ;
+      myNode.innerHTML += '<br> <p> Budget : ' +  msg.Budget + '<p>'  ;
+      myNode.innerHTML += '<br> <p> EndDate : ' +  msg.EndDate + '<p>'  ;
+    })
+    socket.on('ClearElementsAccount', function(msg) {
+      clearElementsAccount();
+    })
+    socket.on('TransactionsShow', function(msg) {
+      const myNode = document.getElementById("ProposalsDisplayed2");
+      myNode.innerHTML += ' <br> Date : ' +  msg.Date   ;
+      myNode.innerHTML += ' &nbsp;&nbsp;&nbsp;&nbsp; Amount Withdrawn : ' +  msg.Amount   ;
+      myNode.innerHTML += ' &nbsp;&nbsp;&nbsp;&nbsp; Reason for  Withdrawal : ' +  msg.Reason   ;
+      myNode.innerHTML += '&nbsp;&nbsp;&nbsp;&nbsp; Budget after : ' +  msg.TotalAmount + '<p>'  ;
+    })
+    socket.on('ResearchSearchBar', function(msg) {
+      const myNode = document.getElementById("ProposalsDisplayed2");
+      myNode.innerHTML += '<br><input type="text" id="SearchString" value="">';
+      myNode.innerHTML += '<button type="button" id = "SearchResearchersId" onclick="SearchStringFunction()">Search</button>';
+    })
+    socket.on('ListResearchers', function(msg) {
+      const myNode = document.getElementById("ProposalsDisplayed2");
+      myNode.innerHTML += ' <br> Name : ' +  msg.Name   ;
+      myNode.innerHTML += '<div style="width:420px; height:auto; display:inline-block"></div><button type="button" id = "Buttons" onclick="AddResearcher(\'' + msg.Name + '\' , \'' + msg.ID + '\', \'' + msg.HolderID + '\')">Add</button>';
+    })
+    socket.on('ListResearchersRemove', function(msg) {
+      const myNode = document.getElementById("ProposalsDisplayed2");
+      myNode.innerHTML += ' <br> Name : ' +  msg.Name   ;
+      myNode.innerHTML += '<div style="width:420px; height:auto; display:inline-block"></div><button type="button" id = "Buttons" onclick="RemoveResearcher( \'' + msg.ID + '\')">Remove</button>';
+    })
+  </script>
+    <form action="Form.php" id="ResearchForm">
+      <fieldset>
+      <legend style="color : #0a0a0a; font-family: Helvetica, Arial; font-size : 34px; ">Research Proposal Status</legend>
+        <section id = "buttons">
+            <button type="button" id="Buttons" onclick="AcceptedProposals()" >Accepted</button>
+                <!-- Style button -->
+                <style>
+            /* CSS */
+                button[id=Buttons] {
+                  font-family: "Open Sans", sans-serif;
+                  font-size: 16px;
+                  width: 255px;
+                  height:40px;
+                  letter-spacing: 2px;
+                  text-decoration: none;
+                  text-transform: uppercase;
+                  color: #000;
+                  cursor: pointer;
+                  border: 3px solid;
+                  padding: 0.25em 0.5em;
+                  box-shadow: 1px 1px 0px 0px, 2px 2px 0px 0px, 3px 3px 0px 0px, 4px 4px 0px 0px, 5px 5px 0px 0px;
+                  user-select: none;
+                  -webkit-user-select: none;
+                  touch-action: manipulation;
+                }
+        
+                button[id=create-room]:active {
+                  box-shadow: 0px 0px 0px 0px;
+                }
+        
+            @media (min-width: 768px) {
+              .button-54 {
+                padding: 0.25em 0.75em;
+              }
+            }
+                </style>
+  
+            <button type="button" id="Buttons" onclick="RejectedProposals()"  >Rejected</button>
+            <button type="button" id="Buttons" onclick="IdleProposals()" >Idle</button>
+            <button type="button" id="Buttons" onclick="NewProposal()"  >New Proposal</button>
+            <button type="button" id="Buttons" onclick="AccountsAdded()"  >Accounts added</button>
+        </section>
+        <div class = "ProposalsDisplayed" id="ProposalsDisplayed2">
+          <p>Proposal Title:</p>
+        </div>  
+        
+      </fieldset>
+    </form>
+  </body>
+</html>
